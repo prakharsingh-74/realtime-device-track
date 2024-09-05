@@ -3,17 +3,25 @@ let socket = io();
 if (navigator.geolocation) {
     navigator.geolocation.watchPosition((position) => {
         const { latitude, longitude } = position.coords;
-
-        // Emit the location data to the server
+        console.log("Current Location:", latitude, longitude);
         socket.emit("send-location", { latitude, longitude });
+        map.setView([latitude, longitude], 10);
+        if (!markers["self"]) {
+            markers["self"] = L.marker([latitude, longitude]).addTo(map);
+        } else {
+            markers["self"].setLatLng([latitude, longitude]);
+        }
     }, (error) => {
-        console.error(error);
+        console.error("Error getting location:", error);
     }, {
         enableHighAccuracy: true,
         timeout: 5000,
         maximumAge: 0
     });
+} else {
+    console.error("Geolocation is not supported by this browser.");
 }
+
 
 // Initialize the Leaflet map
 const map = L.map("map").setView([0, 0], 10);
